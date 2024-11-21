@@ -1,0 +1,48 @@
+name: Deploy Kuama Merry Christmas WebApp
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_input:
+        description: 'Number, eg: 0.1.2'
+        required: true
+        default: '0.0.0'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ssh-deploy:
+    name: Build & Push to DockerHub and SSH pull it
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build & Push docker-compose
+        run: |
+          docker build --no-cache -t kuamadev/merry-christmas-webapp:${{ github.event.inputs.version_input }} .
+          docker push kuamadev/merry-christmas-webapp:${{ github.event.inputs.version_input }}
+
+      - name: SSH - pull images - create env - start
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.STAGING_SERVER_IP }}
+          username: ${{ secrets.STAGING_SERVER_USER }}
+          key: ${{ secrets.STAGING_SERVER_KEY }}
+          script_stop: true
+          script: |
+            cd kuama-happy-christmas
+            echo "✨ Login to dockerhub"
+            docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
+            echo "✨ Pull latest Merry Christmas WebApp image from kuamadev"
+            docker pull kuamadev/merry-christmas-webapp:${{ github.event.inputs.version_input }}
+            echo "✨ Start docker"
+            APP_VERSION="${{ github.event.inputs.version_input }}" docker compose up -d
+            echo "🚀 All done 🚀"
+
