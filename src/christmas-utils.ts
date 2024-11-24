@@ -21,7 +21,7 @@ export const getChristmasWorld: () => Promise<ChristmasBasics> = async () => {
     75,
     sceneWidth / sceneHeight,
     0.1,
-    1000,
+    1000
   );
   const renderer = new THREE.WebGLRenderer({ alpha: true });
   renderer.setSize(sceneWidth, sceneHeight);
@@ -75,7 +75,8 @@ export const addChristmasLights = ({ scene, ...params }: ChristmasBasics) => {
 
 export const addChristmasCarousel = async ({
   scene,
-  ...params
+  renderer,
+  camera,
 }: ChristmasBasics): Promise<ChristmasCarousel> => {
   try {
     const loader = new GLTFLoader();
@@ -90,17 +91,34 @@ export const addChristmasCarousel = async ({
     scene.add(pivot);
     pivot.add(mesh);
 
+    function onWindowResize() {
+      const newInnerWidth = window.innerWidth;
+      const newInnerHeight = window.innerHeight;
+      renderer.setSize(newInnerWidth, newInnerHeight);
+      camera.aspect = newInnerWidth / newInnerHeight;
+
+      setZoomLevelBasedOnScreenAspectRatio(camera, camera.aspect);
+
+      camera.updateProjectionMatrix();
+    }
+
+    window.addEventListener("resize", onWindowResize);
+    setZoomLevelBasedOnScreenAspectRatio(camera, camera.aspect);
+    camera.updateProjectionMatrix();
+
     return {
       carousel: pivot,
       scene,
-      ...params,
+      camera,
+      renderer,
     };
   } catch (error) {
     console.error("Error loading the model:", error);
     return {
       carousel: new THREE.Group(),
       scene,
-      ...params,
+      renderer,
+      camera,
     };
   }
 };
@@ -117,4 +135,16 @@ export const showTheWorldToTheChildren = ({
     renderer,
     ...params,
   };
+};
+
+const setZoomLevelBasedOnScreenAspectRatio = (
+  camera: PerspectiveCamera,
+  aspectRatio: number
+) => {
+  //TODO find a more deterministic way to set the zoom level
+  if (aspectRatio > 0.8) {
+    camera.zoom = 1;
+  } else {
+    camera.zoom = aspectRatio * 1.4;
+  }
 };
