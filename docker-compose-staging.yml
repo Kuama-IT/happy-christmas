@@ -1,5 +1,11 @@
 services:
   happy-christmas-webapp:
-    container_name: "webapp"
+    container_name: "happy-christmas-webapp"
     image: kuamadev/merry-christmas-webapp:${APP_VERSION}
     restart: always
+    networks:
+      - https-portal
+
+networks:
+  https-portal:
+    external: true
