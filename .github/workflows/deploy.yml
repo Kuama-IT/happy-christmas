@@ -37,7 +37,7 @@ jobs:
           key: ${{ secrets.STAGING_SERVER_KEY }}
           script_stop: true
           script: |
-            cd kuama-happy-christmas
+            cd /root/kuama/happy-christmas
             echo "✨ Login to dockerhub"
             docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
             echo "✨ Pull latest Merry Christmas WebApp image from kuamadev"

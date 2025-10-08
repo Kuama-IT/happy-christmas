@@ -1,17 +1,5 @@
 services:
-  https-portal:
-    container_name: "https-portal"
-    image: steveltn/https-portal:1
-    restart: always
-    security_opt:
-      - seccomp:unconfined
-    ports:
-      - "80:80"
-      - "443:443"
-    environment:
-      STAGE: "production"
-      DOMAINS: "merry-christmas-2024.kuama.net -> http://webapp:3000" #
-  webapp:
+  happy-christmas-webapp:
     container_name: "webapp"
     image: kuamadev/merry-christmas-webapp:${APP_VERSION}
     restart: always
