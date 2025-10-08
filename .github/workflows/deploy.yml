@@ -43,6 +43,6 @@ jobs:
             echo "✨ Pull latest Merry Christmas WebApp image from kuamadev"
             docker pull kuamadev/merry-christmas-webapp:${{ github.event.inputs.version_input }}
             echo "✨ Start docker"
-            APP_VERSION="${{ github.event.inputs.version_input }}" docker-compose up -d
+            APP_VERSION="${{ github.event.inputs.version_input }}" docker compose up -d
             echo "🚀 All done 🚀"
 
